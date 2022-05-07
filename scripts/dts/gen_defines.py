@@ -652,7 +652,11 @@ def write_vanilla_props(node):
             # DT_N_<node-id>_P_<prop-id>_IDX_<i>_EXISTS
             for i, subval in enumerate(prop.val):
                 if isinstance(subval, str):
+                    subprop = edtlib.Property(None, subval, None)
+
                     macro2val[macro + f"_IDX_{i}"] = quote_str(subval)
+                    macro2val[macro + f"_IDX_{i}_STRING_TOKEN"] = subprop.val_as_token
+                    macro2val[macro + f"_IDX_{i}_STRING_UPPER_TOKEN"] = subprop.val_as_token.upper()
                 else:
                     macro2val[macro + f"_IDX_{i}"] = subval
                 macro2val[macro + f"_IDX_{i}_EXISTS"] = 1
