@@ -52,6 +52,7 @@
  * _IDX_<i>_PH: phandle array's phandle by index (or phandle, phandles)
  * _IDX_<i>_STRING_TOKEN: string array element value as a token
  * _IDX_<i>_STRING_UPPER_TOKEN: string array element value as a uppercased token
+ * _IDX <i>_STRING_UNQUOTED: string array element value without quotes
  * _IDX_<i>_VAL_<val>: phandle array's specifier value by index
  * _IDX_<i>_VAL_<val>_EXISTS: cell value exists, by index
  * _LEN: property logical length
@@ -60,6 +61,7 @@
  * _NAME_<name>_VAL_<val>_EXISTS: cell value exists, by name
  * _STRING_TOKEN: string property's value as a token
  * _STRING_UPPER_TOKEN: like _STRING_TOKEN, but uppercased
+ * _STRING_UNQUOTED: string property's value without quotes
  */
 
 /**
@@ -915,6 +917,50 @@
 		(DT_STRING_UPPER_TOKEN(node_id, prop)), (default_value))
 
 /**
+ * @brief Get a string property's value as a unquoted string content.
+ *
+ * This removes "the quotes" from string-valued properties.
+ * That can be useful, for example,
+ * when defining floating point values as a string or a equation
+ * that may contain functions to call.
+ *
+ * DT_STRING_UNQUOTED() can only be used for properties with string type.
+ *
+ * It is an error to use DT_STRING_UNQUOTED() in other circumstances.
+ *
+ * Example devicetree fragment:
+ *
+ *     n1: node-1 {
+ *             prop = "12.7";
+ *     };
+ *     n2: node-2 {
+ *             prop = "0.5";
+ *     }
+ *     n3: node-3 {
+ *             prop = "(2 * M_PI * pow(12, 2))";
+ *     };
+ *
+ * Example bindings fragment:
+ *
+ *     properties:
+ *       prop:
+ *         type: string
+ *
+ * Example usage:
+ *
+ *     DT_STRING_UNQUOTED(DT_NODELABEL(n1), prop) // 12.7
+ *     DT_STRING_UNQUOTED(DT_NODELABEL(n2), prop) // 0.5
+ *     DT_STRING_UNQUOTED(DT_NODELABEL(n3), prop) // (2 * M_PI * pow(12, 2))
+ *
+ * @param node_id node identifier
+ * @param prop lowercase-and-underscores property string name
+ * @return the value of @p prop as a token, i.e. without any quotes
+ *         and with special characters converted to underscores
+ */
+#define DT_STRING_UNQUOTED(node_id, prop) \
+	DT_CAT4(node_id, _P_, prop, _STRING_UNQUOTED)
+
+/**
  * @brief Get an element out of a string-array property as a token.
  *
  * This removes "the quotes" from an element in the array, and converts
@@ -1001,6 +1047,50 @@
  */
 #define DT_STRING_UPPER_TOKEN_BY_IDX(node_id, prop, idx) \
 	DT_CAT6(node_id, _P_, prop, _IDX_, idx, _STRING_UPPER_TOKEN)
+
+/**
+ * @brief Get a string array item value as a unquoted string content.
+ *
+ * This removes "the quotes" from string-valued item.
+ * That can be useful, for example,
+ * when defining floating point values as a string or a equation
+ * that may contain functions to call.
+ *
+ * DT_STRING_UNQUOTED_BY_IDX() can only be used for properties with
+ * string-array type.
+ *
+ * It is an error to use DT_STRING_UNQUOTED_BY_IDX() in other circumstances.
+ *
+ * Example devicetree fragment:
+ *
+ *     n1: node-1 {
+ *             prop = "12.7", "34.1";
+ *     };
+ *     n2: node-2 {
+ *             prop = "a", "pow(a, 2)";
+ *     }
+ *
+ * Example bindings fragment:
+ *
+ *     properties:
+ *       prop:
+ *         type: string-array
+ *
+ * Example usage:
+ *
+ *     DT_STRING_UNQUOTED_BY_IDX(DT_NODELABEL(n1), prop, 0) // 12.7
+ *     DT_STRING_UNQUOTED_BY_IDX(DT_NODELABEL(n1), prop, 1) // 34.1
+ *     DT_STRING_UNQUOTED_BY_IDX(DT_NODELABEL(n2), prop, 0) // a
+ *     DT_STRING_UNQUOTED_BY_IDX(DT_NODELABEL(n2), prop, 0) // pow(a, 2)
+ *
+ * @param node_id node identifier
+ * @param prop lowercase-and-underscores property string name
+ * @param idx the index to get
+ * @return the value of @p prop as a token, i.e. without any quotes
+ *         and with special characters converted to underscores
+ */
+#define DT_STRING_UNQUOTED_BY_IDX(node_id, prop, idx) \
+	DT_CAT4(node_id, _P_, prop##_IDX_##idx, _STRING_UNQUOTED)
 
 /*
  * phandle properties
