@@ -32,6 +32,7 @@
 
 #include "buf_view.h"
 #include "addr_internal.h"
+#include "gatt_gap_svc_validate.h"
 #include "hci_core.h"
 #include "id.h"
 #include "adv.h"
@@ -4135,6 +4136,14 @@ int bt_conn_init(void)
 	}
 
 	bt_att_init();
+
+	if (IS_ENABLED(CONFIG_BT_GATT_GAP_SVC_VALIDATE)) {
+		err = gatt_gap_svc_validate();
+		if (err != 0) {
+			LOG_DBG("GATT GAP service validation failed (err %d)", err);
+			return err;
+		}
+	}
 
 	err = bt_smp_init();
 	if (err) {
